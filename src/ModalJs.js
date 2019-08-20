@@ -14,8 +14,8 @@ class modal{
     show(params={title:"查看",content:`<p>内容</p>`,close:true,shadow:"black",btn:["确定","关闭"]}){
         let title = this.empty(params.title) ? "查看" : params.title;
         let content = this.empty(params.content) ? `<p>这是内容</p>` : params.content;
-        let close = this.empty(params.close) ? true : false;
-        let btn = this.empty(params.btn) ? ["查看","关闭"] : params.btn;
+        let close = this.empty(params.close) ? true : params.close;
+        let btn = this.empty(params.btn) ? ["确定","关闭"] : params.btn;
         let instanceId = "ModalJs_"+this.getRandStr(6);
         let maxZidx = this.getMaxZIndex();
         let shadow;
@@ -34,8 +34,8 @@ class modal{
         btn.map((item,index) => {
             //先注册全局方法
             let fn;
-            if (!this.empty(params.btn1)){
-                fn = params.btn1;
+            if (!this.empty(params["btn"+index])){
+                fn = params["btn"+index];
             }else{
                 fn = () => {
                     __MODAL__.hide();
@@ -53,7 +53,7 @@ class modal{
             }
         });
         //按钮组结束
-
+        //遮罩层开始
         if(this.empty(params.shadow)){
             shadow = "black";
         }else{
@@ -67,15 +67,23 @@ class modal{
                 shadowHtml = `<div style="z-index:${maxZidx + 2};background: rgba(255,255,255,.6);width: 100%;height: 100vh;position: fixed;top: 0;left: 0"></div>`;
             }
         }
+        //遮罩层结束
+        //关闭按钮开始
+        let closeHtml = `<div style="display: inline-block;float: right;padding: 0 8px;cursor: pointer" onclick="__MODAL__.hideById('${instanceId}')">
+                            <svg style="width: 1em;height: 1em" t="1566199783483" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1968" width="200" height="200"><path d="M645.44 512l200.14-200.14c24.56-24.56 24.56-64.38 0-88.96l-44.48-44.48c-24.56-24.56-64.38-24.56-88.96 0L512 378.56 311.86 178.42c-24.56-24.56-64.38-24.56-88.96 0L178.42 222.9c-24.56 24.56-24.56 64.38 0 88.96L378.56 512 178.42 712.14c-24.56 24.56-24.56 64.38 0 88.96l44.48 44.48c24.56 24.56 64.4 24.56 88.96 0L512 645.44l200.14 200.14c24.56 24.56 64.4 24.56 88.96 0l44.48-44.48c24.56-24.56 24.56-64.38 0-88.96L645.44 512z" fill="#333333" p-id="1969"></path></svg>
+                        </div>`;
+        if(!close){
+            closeHtml = `<div style="display: inline-block;float: right;padding: 0 8px">
+                        </div>`;
+        }
+        //关闭按钮结束
         let html = `
         ${shadowHtml}
         <div style="max-width: 100%;max-height: 100vh;min-width: 500px;min-height: 300px;background: #ffffff;z-index: ${maxZidx + 3};position:absolute;left: 50%;top:50%;transform: translateX(-50%) translateY(-50%)">
             <!-- Title Bar Start -->
             <div style="height: 30px;width: 100%;background: linear-gradient(60deg,#2f9688,#4fc08d);line-height: 30px;color: #ffffff">
                 <div style="display: inline-block;padding: 0 8px;font-size: 0.9em; float: left">${title}</div>
-                <div style="display: inline-block;float: right;padding: 0 8px">
-                    <svg style="width: 1em;height: 1em" t="1566199783483" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1968" width="200" height="200"><path d="M645.44 512l200.14-200.14c24.56-24.56 24.56-64.38 0-88.96l-44.48-44.48c-24.56-24.56-64.38-24.56-88.96 0L512 378.56 311.86 178.42c-24.56-24.56-64.38-24.56-88.96 0L178.42 222.9c-24.56 24.56-24.56 64.38 0 88.96L378.56 512 178.42 712.14c-24.56 24.56-24.56 64.38 0 88.96l44.48 44.48c24.56 24.56 64.4 24.56 88.96 0L512 645.44l200.14 200.14c24.56 24.56 64.4 24.56 88.96 0l44.48-44.48c24.56-24.56 24.56-64.38 0-88.96L645.44 512z" fill="#333333" p-id="1969"></path></svg>
-                </div>
+                ${closeHtml}
                 <div style="clear: both"></div>
             </div>
             <!-- Title Bar End -->
@@ -103,6 +111,15 @@ class modal{
             });
         }else{
             document.body.removeChild(arguments[0]);
+        }
+    }
+    hideById(){
+        if(this.empty(arguments[0])){
+            [...document.getElementsByClassName("__modaljsinstance__")].map(item => {
+                document.body.removeChild(item);
+            });
+        }else{
+            document.body.removeChild(document.getElementById(arguments[0]));
         }
     }
     empty(data){
